@@ -77,7 +77,7 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         # Add the positional encoding to the input tensor
-        x = x + (self.pe[:, :x.shape[1], :]).requiers_grad_(False) #(batch, seq_len, d_model)
+        x = x + (self.pe[:, :x.shape[1], :]).requires_grad_(False) #(batch, seq_len, d_model)
 
         # Apply dropout to the input tensor
         return self.dropout(x)
@@ -118,7 +118,7 @@ class MultiHeadAttentionBlock(nn.Module):
             attention_scores.masked_fill_(mask == 0, -1e9)
         attention_scores = attention_scores.softmax(dim=-1) # (batch, h, seq_len, seq_len) # Apply soft
         if dropout is not None:
-            attention_scores = dropout (attention_scores)
+            attention_scores = dropout(attention_scores)
         # (batch, h, seq_len, seq_len) --> (batch, h, seq_len, d_k)
         # return attention scores which can be used for visualization
         return (attention_scores @ value), attention_scores
@@ -146,7 +146,7 @@ class MultiHeadAttentionBlock(nn.Module):
 
 
 class EncoderBlock(nn.Module):
-    def __init__(self, self_attention_block: MultiHeadAttentionBlock, feed_forward_block: FeedForwardBlock, dropout: float = 0.1):
+    def __init__(self, self_attention_block: MultiHeadAttentionBlock, feed_forward_block: FeedForwardBlock, dropout: float):
         super().__init__()
         self.self_attention_block = self_attention_block
         self.feed_forward_block = feed_forward_block
@@ -256,7 +256,7 @@ def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int
         decoder_self_attention_block = MultiHeadAttentionBlock(d_model, h, dropout)
         decoder_cross_attention_block = MultiHeadAttentionBlock(d_model, h, dropout)
         feed_forward_block = FeedForwardBlock(d_model, d_ff, dropout)
-        decoder_block = DecoderBlock(decoder_self_attention_block, decoder_cross_attention_block, feed_forward_block)
+        decoder_block = DecoderBlock(decoder_self_attention_block, decoder_cross_attention_block, feed_forward_block, dropout)
         decoder_blocks.append(decoder_block)
 
     # Create the encoder and decoder
